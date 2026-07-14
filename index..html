@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>限界飯ガチャ</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body { font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif; background-color: #fce4ec; color: #333; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 400px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { font-size: 24px; color: #d81b60; margin-bottom: 5px; }
+        p.desc { font-size: 13px; color: #666; margin-bottom: 20px; line-height: 1.5; }
+        input[type="text"] { width: 90%; padding: 12px; margin: 8px 0; border: 2px solid #f8bbd0; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        button { background-color: #d81b60; color: #fff; border: none; padding: 15px 30px; font-size: 18px; border-radius: 25px; cursor: pointer; font-weight: bold; margin-top: 20px; width: 90%; transition: transform 0.1s; box-shadow: 0 4px 6px rgba(216, 27, 96, 0.3); }
+        button:active { transform: scale(0.95); box-shadow: 0 2px 4px rgba(216, 27, 96, 0.3); }
+        #gacha-area { margin-top: 30px; min-height: 180px; }
+        .loading { font-size: 50px; animation: spin 1s linear infinite; display: none; margin-top: 40px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .result-card { background: #fff3e0; border: 2px dashed #ff9800; padding: 20px; border-radius: 10px; display: none; margin-top: 10px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .recipe-name { font-size: 18px; font-weight: bold; color: #e65100; margin-bottom: 15px; border-bottom: 1px solid #ffcc80; padding-bottom: 10px; }
+        .recipe-steps { text-align: left; font-size: 14px; line-height: 1.8; color: #424242; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍳 限界飯ガチャ</h1>
+        <p class="desc">大学の課題やレポートで忙しい日も、<br>冷蔵庫の残り物で奇跡のズボラ飯を錬成しよう！</p>
+        
+        <input type="text" id="ing1" placeholder="食材① (例: もやし、豆腐)">
+        <input type="text" id="ing2" placeholder="食材② (例: 卵、チーズ)">
+        <input type="text" id="ing3" placeholder="調味料 (例: めんつゆ、マヨ)">
+        
+        <button onclick="spinGacha()">ガチャを回す！</button>
+
+        <div id="gacha-area">
+            <div id="loading" class="loading">🌀</div>
+            <div id="result" class="result-card">
+                <div class="recipe-name" id="recipe-name"></div>
+                <div class="recipe-steps" id="recipe-steps"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const templates = [
+            {
+                name: "【{ing1}と{ing2}の虚無炒め {ing3}風味】",
+                steps: "1. フライパンを温める気力を振り絞る。<br>2. {ing1}と{ing2}を適当にちぎってぶち込む。<br>3. {ing3}をドバっとかけて炒める。<br>4. 皿洗いが面倒なのでフライパンから直食いする。"
+            },
+            {
+                name: "【奇跡のマリアージュ！{ing1}乗せ{ing2}丼】",
+                steps: "1. どんぶりにご飯（別売）をよそう。<br>2. {ing1}をレンジでチンして温める。<br>3. ご飯の上に{ing1}と{ing2}をダイナミックに乗せる。<br>4. {ing3}で味を整えたら完成。意外とイケる。"
+            },
+            {
+                name: "【深夜の背徳・{ing1}の{ing3}和え】",
+                steps: "1. ボウルに{ing1}と{ing2}を入れる。<br>2. {ing3}を致死量すれすれまで入れる。<br>3. 無心で混ぜ合わせる。<br>4. カロリーを気にせず貪り食う。"
+            },
+            {
+                name: "【レンジで一撃！{ing2}と{ing1}の謎スープ】",
+                steps: "1. 大きめのマグカップに{ing1}と{ing2}をねじ込む。<br>2. お湯を適当に入れ、{ing3}を溶かす。<br>3. レンジで2分加熱。<br>4. 火傷に気をつけながらすする。心身が温まる。"
+            }
+        ];
+
+        function spinGacha() {
+            // 入力が空の場合はデフォルトの単語を入れる
+            const ing1 = document.getElementById('ing1').value || '謎の草';
+            const ing2 = document.getElementById('ing2').value || '名状しがたい何か';
+            const ing3 = document.getElementById('ing3').value || '塩';
+
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            // アニメーション用に一度結果を隠す
+            result.style.display = 'none';
+            loading.style.display = 'inline-block';
+
+            // ガチャ演出 (1.5秒待機)
+            setTimeout(() => {
+                loading.style.display = 'none';
+                
+                // ランダムにレシピテンプレートを選ぶ
+                const recipe = templates[Math.floor(Math.random() * templates.length)];
+                
+                // テンプレートの {ing1} などを入力された文字に置き換える
+                const finalName = recipe.name.replace(/{ing1}/g, ing1).replace(/{ing2}/g, ing2).replace(/{ing3}/g, ing3);
+                const finalSteps = recipe.steps.replace(/{ing1}/g, ing1).replace(/{ing2}/g, ing2).replace(/{ing3}/g, ing3);
+                
+                document.getElementById('recipe-name').innerHTML = finalName;
+                document.getElementById('recipe-steps').innerHTML = finalSteps;
+                
+                // 結果をフワッと表示
+                result.style.display = 'block';
+            }, 1500);
+        }
+
+        // PWA用のService Worker登録
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+</body>
+</html>
